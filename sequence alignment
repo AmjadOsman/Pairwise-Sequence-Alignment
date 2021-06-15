@@ -1,0 +1,126 @@
+import os,sys
+from collections import defaultdict # used for extractmatrix
+#ANFNNASWF
+file_info=input('enter file') # line 3/4 is to open and read file 
+file=open(file_info,'r')
+
+
+file_seq=list(file.read()) # turning the sequence to list, allows me to transcribe
+file_seq.remove('\n') # remove space 
+print(file_seq)
+
+codon_chart={'phe':['UUU','UUC'],#Pheylalanine
+'leu':['UUA','UUG','CUU','CUC','CUA','CUG' ],#Leucine
+'lle':['AUU','AUC','AUA'],#Isoleucine
+'met':['AUG'],#Methionine - start codon
+'val':['GUU','GUC','GUA','GUG'],#valine
+'ser':['UCU','UCC','UCA','UCG','AGU','AGC'],#serine
+'pro':['CCU','CCC','CCA','CCG'],#proline
+'thr':['ACU','ACC','ACA','ACG'],#threonine 
+'ala':['GCU','GCC','GCA','GCG'],#Alanine
+'tyr':['UAU','UAC'],#Tyrosine
+'stop':['UAA','UAG','UGA'],#Stop codon
+'his':['CAU','CAC',],#Histidine
+'gln':['CAA','CAG'],#Glutamine
+'asn':['AAU','AAC'],#Asparagine
+'lys':['AAA','AAG'],#Lysine
+'asp':['GAU','GAC'],#Aspartic acid
+'glu':['GAU','GAC'],#glutamic acid
+'cys':['UGU','UGC'],#cysteine
+'arg':['CGU','CGC','CGA','CGG','AGA','AGG'],#arginine 
+'gly':['GGU','GGC','GGA','GGA']}#glycine
+    
+def transcription(sequence): # converting Dna to rna 
+    rna_seq=sequence.replace('T','U')
+    return rna_seq
+
+def translation(rna_strand): # converting rna to protein 
+    rna_strand=[rna_strand[i:i+3] for i in range(0,len(rna_strand),3)] 
+    protein_seq=''
+    for protein in rna_strand:
+        for key, value in codon_chart.items():
+            if protein in value:# ask if you want to comma between protein
+                protein_seq += key #not sure if later need value or key , but we can switch it 
+    return protein_seq
+
+def get_file(): # getting and opening file 
+    inp1=input('Enter file for first seq  ')
+    try:
+        with open(inp1,'r') as f:
+            pass
+    except FileNotFoundError:
+        print('.txt not valid')
+        exit()
+    
+    inp2=input('Enter Filename for second sequence:')
+    try:
+        with open(inp2,'r') as f:
+            pass
+    except FileNotFoundError:
+        print('.txt not valid')
+        exit()
+    
+    sub_matrix=input('Enter Filename for matrix:'):
+    try:
+        with open (sub_matrix,'r') as f:
+            pass
+    except FileNotFoundError:
+        print('Invalid file')
+        exit()
+
+    return inp1,inp2,sub_matrix
+
+
+
+# extracting the sequence 
+def extract_seq(file):
+    with open(file) as A:
+        line= A.readlines()
+        lines=line[1].strip()
+    return lines 
+
+
+#making a zero filled matrix based on sequence size 
+def matrix(x,y):
+    return [[0]*y for i in range(x)]
+
+
+# extracts the matrix and saves it in a dictionary
+def extractmatrix(file):
+    matrix=defaultdict(dict)
+
+    with open (file,'r') as f: 
+        line= f.readlines()
+        nucleotide= line[1].strip().split(',')
+        lines=[j.strip().split(',') for j in line] # you took out the [] out of the j 
+        lines=lines[2:]
+        lines=[[int((x))for x in lst]for lst in lines]
+
+        for dna in nucleotide:
+            # print(f'this is dna {dna}')
+            for number in lines:
+
+                matrix[dna]=number
+                lines.remove(number)
+                break
+            
+        return matrix
+                     
+
+def matrix_score (file):
+    with open (file,'r') as f:
+        matrix= f.readlines()
+        line=[i.strip().split(',') for i in matrix ]
+        lines= line[2:]
+        lines=[[int((x))for x in i ]for i in lines]
+        firstlst= range(len(lines[0]))
+        # print(f'ths is firstlst {firstlst}')
+    
+            
+        print ([lines[i][i]for i in firstlst])
+
+
+    
+
+def global_alignment(): 
+    get_file

@@ -118,9 +118,60 @@ def matrix_score (file):
     
             
         print ([lines[i][i]for i in firstlst])
+        
+        
+match_score = 1 
+mismatch_score=-1
+gap_score=-2
+
+
+def global_alignment(x,y):
+
+
+    n_matrix=matrix(len(x),len(y))
+    main_matrix= matrix(len(x)+1,len(y)+1)
+    # trace_back=matrix(len(x)+1,len(y)+1)
+    # trace_back[0][0]=(0,0)
+    
+
+    for i in range(len(y)):# match mismatch matrix 
+        for j in range(len(x)):
+            if i==j:
+                n_matrix[i][j]=match_score
+            else:
+                n_matrix[j][i]=mismatch_score
+    print( f'nmatrix-{n_matrix}')
+
+
+    for i in range(len(x)+1):
+        main_matrix[i][0]=gap_score*i
+    for j in range(len(y)+1):
+        main_matrix[0][j]=gap_score*j
+    print(f'main-{main_matrix}')
+
+
+
+
+
+    for i in range(len(y)):
+        for j in range(1,len(x)+1):
+            # if main_matrix[i][j]==
+            main_matrix[i][j]=max(main_matrix[i-1][j-1]+n_matrix[j-1][i-1],main_matrix[i][j-1]+gap_score,main_matrix[i-1][j]+gap_score)
+    print(f'final-{main_matrix}')
+
+
+
+             
+    
+  
+
+
+
+
+
+global_alignment('abc','abcd')
+
 
 
     
 
-def global_alignment(): 
-    get_file

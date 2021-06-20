@@ -128,18 +128,21 @@ gap_score=-2
 def global_alignment(x,y):
 
 
-    n_matrix=matrix(len(x),len(y))
+    n_matrix=matrix(len(x)+1,len(y)+1) # add +1 here 
     main_matrix= matrix(len(x)+1,len(y)+1)
+   
     # trace_back=matrix(len(x)+1,len(y)+1)
     # trace_back[0][0]=(0,0)
-    
 
-    for i in range(len(y)):# match mismatch matrix 
-        for j in range(len(x)):
+    for i in range(len(x)): # match mismatch matrix 
+        for j in range(len(y)):
             if i==j:
                 n_matrix[i][j]=match_score
+                
             else:
-                n_matrix[j][i]=mismatch_score
+                n_matrix[i][j]=mismatch_score
+
+                
     print( f'nmatrix-{n_matrix}')
 
 
@@ -153,12 +156,10 @@ def global_alignment(x,y):
 
 
 
-    for i in range(len(y)):
-        for j in range(1,len(x)+1):
-            # if main_matrix[i][j]==
-            main_matrix[i][j]=max(main_matrix[i-1][j-1]+n_matrix[j-1][i-1],main_matrix[i][j-1]+gap_score,main_matrix[i-1][j]+gap_score)
+    for i in range(1,len(x)+1):
+        for j in range(1,len(y)+1):
+            main_matrix[i][j]=max(main_matrix[i-1][j-1]+n_matrix[j-1][i-1],max(main_matrix[i-1][j]+gap_score,main_matrix[i][j-1]+gap_score))
     print(f'final-{main_matrix}')
-
 
 
              

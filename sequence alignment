@@ -194,6 +194,80 @@ def global_alignment(x,y):
     print(align1)
 
 
+def local_alignment(x,y):
+
+    l_matrix=matrix(len(x)+1,len(y)+1)
+    # print(l_matrix)
+    final_matrix= matrix(len(x)+1,len(y)+1)
+    trace_matrix= matrix(len(x)+1,len(y)+1)
+
+    for i in range(len(x)):
+        for j in range(len(y)): 
+            if x[i]==y[j]:
+                l_matrix[i][j]=match_score
+            else:
+                l_matrix[i][j]=mismatch_score
+    
+
+    
+    print(f'this is l_matrix {l_matrix}')
+
+
+    for i in range(len(x)+1):
+            final_matrix[i][0]=i*gap_score
+    for j in range(len(y)+1):
+        final_matrix[0][j]=j*gap_score
+    
+
+    for inside,outside in enumerate(final_matrix): # l_matrix= [[0 if l <0 for l in a] for a in l_matrix] 
+        for inner,outer in enumerate(outside):
+            if outer<0:
+                final_matrix[inside][inner]=0
+    
+    print(f'this is final{final_matrix}')
+
+    for i in range(1,len(x)+1):
+        for j in range(1,len(y)+1):
+            diagonal= final_matrix[i-1][j-1]+l_matrix[i-1][j-1]
+            left=final_matrix[i][j-1]+gap_score
+            up=final_matrix[i-1][j]+gap_score
+            final_matrix[i][j]=max(0,diagonal,left,up)
+            if final_matrix[i][j]==0:
+                trace_matrix[i][j]=0 #0= end of path 
+            if final_matrix[i][j]==up:
+                trace_matrix[i][j]=1 # trace left
+            if final_matrix[i][j]==left:
+                trace_matrix[i][j]=2 #trace up
+            if final_matrix[i][j]==diagonal: 
+                trace_matrix[i][j]=3 # trace diagonal
+    
+
+    align1= ''
+    align2=''
+    tracei=len(x)
+    tracej=len(y)
+
+    while trace_matrix[tracei][tracej] !=0: 
+        if trace_matrix[tracei][tracej]==3: 
+            align1=x[tracei-1]+align1
+            align2=y[tracej-1]+align2
+
+            tracei=tracei-1 
+            tracej=tracej-1 
+        elif trace_matrix[tracei][tracej] == 2:
+            align1='_'+align1
+            align2=y[tracej-1]+align2
+            tracej=tracej-1 
+        elif trace_matrix[tracei][tracej]==1:
+            align1=x[tracei-1]+align1
+            align2='_'+ align2
+
+            tracei=tracei-1
+
+    print(align1)
+    print(align2)
+       
+
 
 
 
@@ -204,8 +278,6 @@ def global_alignment(x,y):
 
 
 
-
-global_alignment('abc','abcd')
 
 
 

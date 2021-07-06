@@ -1,3 +1,1 @@
-#learning
-
-learning git
+Sequence aligner

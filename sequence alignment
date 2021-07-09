@@ -1,28 +1,35 @@
-import os,sys
 from collections import defaultdict
 from typing import Sequence # used for extractmatrix
 
 
-codon_chart={'phe':['UUU','UUC'],#Pheylalanine
-'leu':['UUA','UUG','CUU','CUC','CUA','CUG' ],#Leucine
-'lle':['AUU','AUC','AUA'],#Isoleucine
-'met':['AUG'],#Methionine - start codon
-'val':['GUU','GUC','GUA','GUG'],#valine
-'ser':['UCU','UCC','UCA','UCG','AGU','AGC'],#serine
-'pro':['CCU','CCC','CCA','CCG'],#proline
-'thr':['ACU','ACC','ACA','ACG'],#threonine 
-'ala':['GCU','GCC','GCA','GCG'],#Alanine
-'tyr':['UAU','UAC'],#Tyrosine
-'stop':['UAA','UAG','UGA'],#Stop codon
-'his':['CAU','CAC',],#Histidine
-'gln':['CAA','CAG'],#Glutamine
-'asn':['AAU','AAC'],#Asparagine
-'lys':['AAA','AAG'],#Lysine
-'asp':['GAU','GAC'],#Aspartic acid
-'glu':['GAU','GAC'],#glutamic acid
-'cys':['UGU','UGC'],#cysteine
-'arg':['CGU','CGC','CGA','CGG','AGA','AGG'],#arginine 
-'gly':['GGU','GGC','GGA','GGA']}#glycine
+codon_chart={'F':['UUU','UUC'],#Pheylalanine
+'L':['UUA','UUG','CUU','CUC','CUA','CUG' ],#Leucine
+'I':['AUU','AUC','AUA'],#Isoleucine
+'M':['AUG'],#Methionine - start codon
+'V':['GUU','GUC','GUA','GUG'],#valine
+'S':['UCU','UCC','UCA','UCG','AGU','AGC'],#serine
+'P':['CCU','CCC','CCA','CCG'],#proline
+'T':['ACU','ACC','ACA','ACG'],#threonine 
+'A':['GCU','GCC','GCA','GCG'],#Alanine
+'Y':['UAU','UAC'],#Tyrosine
+'*':['UAA','UAG','UGA'],#Stop codon
+'H':['CAU','CAC',],#Histidine
+'Q':['CAA','CAG'],#Glutamine
+'N':['AAU','AAC'],#Asparagine
+'K':['AAA','AAG'],#Lysine
+'D':['GAU','GAC'],#Aspartic acid
+'E':['GAU','GAC'],#glutamic acid
+'C':['UGU','UGC'],#cysteine
+'R':['CGU','CGC','CGA','CGG','AGA','AGG'],#arginine 
+'G':['GGU','GGC','GGA','GGA']}#glycine
+
+def printMatrix(matrix):
+	
+	#function to print the matrix 
+	for i in range(len(matrix)):
+		print(matrix[i])
+	print()
+
     
 def transcription(sequence): # converting Dna to rna 
     rna_seq=sequence.replace('T','U')
@@ -118,57 +125,81 @@ def matrix_score (file):
 match_score = 1 
 mismatch_score=-1
 
+
+def matrix(x,y):
+    return [[0]*y for i in range(x)]
+
+
+
 def global_alignment(x,y,gap):
-    n_matrix=matrix(len(x)+1,len(y)+1) 
+
+
+    n_matrix=matrix(len(x)+1,len(y)+1) # add +1 here 
     main_matrix= matrix(len(x)+1,len(y)+1)
-    
+   
+    trace_back=matrix(len(x)+1,len(y)+1)
+    # trace_back[0][0]=(0,0)
+
     for i in range(len(x)): # match mismatch matrix 
         for j in range(len(y)):
             if x[i]==y[j]:
-                n_matrix[i][j]=match_score 
+                n_matrix[i][j]=match_score
+ 
             else:
-                n_matrix[i][j]=mismatch_score         
-    # print( f'nmatrix-{n_matrix}')
+                n_matrix[i][j]=mismatch_score
 
-    for i in range(len(x)+1): #gap score matrix 
+
+    for i in range(len(x)+1):
         main_matrix[i][0]=gap*i
     for j in range(len(y)+1):
         main_matrix[0][j]=gap*j
     # print(f'main-{main_matrix}')
 
-    for i in range(1,len(x)+1): # combining main and n matrix + getting the max value 
+    for i in range(1,len(x)+1):
         for j in range(1,len(y)+1):
+            left=main_matrix[i][j-1]+gap
+            up=main_matrix[i-1][j]+gap
+            diagonal= main_matrix[i-1][j-1]+n_matrix[i-1][j-1]
             main_matrix[i][j]=max(main_matrix[i-1][j-1]+n_matrix[i-1][j-1],max(main_matrix[i-1][j]+gap,main_matrix[i][j-1]+gap))
-    print(f'Final matrix-{main_matrix}')
+            if main_matrix[i][j]==left:
+                trace_back[i][j]='left'
+            elif main_matrix[i][j]==up:
+                trace_back[i][j]='up'
+            elif main_matrix[i][j]==diagonal:
+                trace_back[i][j]='diag'
+    print('Scoring matrix:')
+    printMatrix(main_matrix)
+
+    align1 =[]
+    align2=[]
+    i=len(x)    
+    j=len(y)  
+    while(i > 0 or j > 0):
+        if trace_back[i][j] == 'diag':
+			# Diag 
+            align1.append(x[i-1])
+            align2.append(y[j-1])
+            i=i-1
+            j=j-1
+        elif trace_back[i][j] == 'left':
+			# Left 
+            align1.append('-')
+            align2.append(y[j-1])
+            j=j-1
+
+        else:
+			# Up 
+            align1.append(x[i-1])
+            align2.append('-')
+            i = i-1
+			
+
+    print(*align1[::-1])
+    print(*align2[::-1])
 
 
-    #traceback
 
-    align1= ''
-    align2=''
-    tracei=len(x)
-    tracej=len(y)
 
-    while (tracei>0 or tracej>0):
-        if (tracei>0 and tracej>0 and main_matrix[tracei][tracej]==main_matrix[tracei-1][tracej-1]+n_matrix[tracei-1][tracej-1]):#diagonal 
-        
-            align1=x[tracei-1] +align1
-            align2= y[tracej-1] + align2
-            
-            tracei=tracej-1
-            tracej=tracej-1
-        elif (tracei>0 and main_matrix[tracei][tracej]==main_matrix[tracei-1][tracej]+gap):#up 
-            align1= x[tracei-1] +align1
-            align2='-'+align2
-
-            tracei=tracei-1
-        else: # left
-            align1='-'+align1
-            align2=y[tracej-1] + align2
-
-            tracej=tracej-1
-    print(align2)
-    print(align1)
 
 
 
@@ -179,6 +210,8 @@ def local_alignment(x,y,gap):
     # print(l_matrix)
     final_matrix= matrix(len(x)+1,len(y)+1)
     trace_matrix= matrix(len(x)+1,len(y)+1)
+    best=0
+    opt=(0,0)
 
     for i in range(len(x)):
         for j in range(len(y)): 
@@ -187,8 +220,6 @@ def local_alignment(x,y,gap):
             else:
                 l_matrix[i][j]=mismatch_score
     
-    # print(f'this is l_matrix {l_matrix}')
-
 
     for i in range(len(x)+1):
             final_matrix[i][0]=i*gap
@@ -196,7 +227,7 @@ def local_alignment(x,y,gap):
         final_matrix[0][j]=j*gap
     
 
-    for inside,outside in enumerate(final_matrix): # l_matrix= [[0 if l <0 for l in a] for a in l_matrix] 
+    for inside,outside in enumerate(final_matrix):  
         for inner,outer in enumerate(outside):
             if outer<0:
                 final_matrix[inside][inner]=0
@@ -208,54 +239,49 @@ def local_alignment(x,y,gap):
             left=final_matrix[i][j-1]+gap
             up=final_matrix[i-1][j]+gap
             final_matrix[i][j]=max(0,diagonal,left,up)
-            if final_matrix[i][j]==0:
-                trace_matrix[i][j]=0 #0= end of path 
-            if final_matrix[i][j]==up:
-                trace_matrix[i][j]=1 # trace left
-            if final_matrix[i][j]==left:
-                trace_matrix[i][j]=2 #trace up
-            if final_matrix[i][j]==diagonal: 
-                trace_matrix[i][j]=3 # trace diagonal
-    print(f'Final matrix-{final_matrix}')
+            
+            if final_matrix[i][j]>=best: # find higest score
+                best= final_matrix[i][j]
+                optloc=(i,j) # this find the location of it 
+    print('Scoring matrix:')
+    printMatrix(final_matrix)
 
-    align1= ''
-    align2=''
-    tracei=len(x)
-    tracej=len(y)
+    
 
-    while trace_matrix[tracei][tracej] !=0: 
-        if trace_matrix[tracei][tracej]==3: 
-            align1=x[tracei-1]+align1
-            align2=y[tracej-1]+align2
+    sequence=''
 
-            tracei=tracei-1 
-            tracej=tracej-1 
-        elif trace_matrix[tracei][tracej] == 2:
-            align1='_'+align1
-            align2=y[tracej-1]+align2
-            tracej=tracej-1 
-        elif trace_matrix[tracei][tracej]==1:
-            align1=x[tracei-1]+align1
-            align2='_'+ align2
+    i=optloc[0]
+    j=optloc[1]
 
-            tracei=tracei-1
+    while (i>0 and j>0):
+        diag=final_matrix[i-1][j-1]+l_matrix[i-1][j-1]
+        left1= final_matrix[i][j-1]+gap
+        up1= final_matrix[i-1][j]+gap
 
-    print(align1)
-    print(align2)
+        if min(diag,left1,up1) ==diag:
+            break 
+        else:
+            i-=1
+            j-=1
+            sequence= sequence +y[j]
+    
+    print(sequence[::-1])
 
 
 
+
+#driver 
 if __name__ == "__main__":
     protein1=''
     protein2= ''
-    input1=input('nucleotide or peptide sequence? (answer n or p) ') 
+    input2=input('nucleotide or peptide sequence or convert dna to protein? (answer n or p or c ):') 
     sequence1,sequence2=get_file()
     seq1=extract_seq(sequence1)
     seq2=extract_seq(sequence2)
     
-    alignType = input("Which alignment would you like to use? Global,or local? (g,l) ")
-    gap=int(input('Enter gap penalty'))
-    if input1.lower()=='n':
+    alignType = input("Which alignment would you like to use? Global,or local? (g,l):")
+    gap=int(input('Enter gap penalty:'))
+    if input2.lower()=='c':
         rna1=transcription(seq1)
         rna2=transcription(seq2)
         protein1=translation(rna1)
@@ -265,7 +291,7 @@ if __name__ == "__main__":
         elif alignType.lower()=='l':
             local_alignment(protein1,protein2,gap)
         else: 
-            raise ValueError('Invalid nput')
+            raise ValueError('Invalid input')
             exit()
     else:
         if alignType.lower()=='g':
@@ -273,7 +299,9 @@ if __name__ == "__main__":
         elif alignType.lower()=='l':
             local_alignment(seq1,seq2,gap)
         else: 
-            raise ValueError('Invalid nput')
-            
-        
+            raise ValueError('Invalid input')
+    
+
+
+       
 

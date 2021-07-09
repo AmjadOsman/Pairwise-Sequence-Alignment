@@ -40,8 +40,8 @@ def translation(rna_strand): # converting rna to protein
     protein_seq=''
     for protein in rna_strand:
         for key, value in codon_chart.items():
-            if protein in value:# ask if you want to comma between protein
-                protein_seq += key #not sure if later need value or key , but we can switch it 
+            if protein in value:
+                protein_seq += key 
     return protein_seq
 
 def get_file(): # getting and opening file 
@@ -60,16 +60,6 @@ def get_file(): # getting and opening file
     except FileNotFoundError:
         print('.txt not valid')
         exit()
-    
-    # sub_matrix=input('Enter Filename for matrix:')
-    # try:
-    #     with open (sub_matrix,'r') as f:
-    #         pass
-    # except FileNotFoundError:
-    #     print('Invalid file')
-    #     exit()
-
-    return inp1,inp2
 
 
 
@@ -108,37 +98,20 @@ def extractmatrix(file):
         return matrix
                      
 
-def matrix_score (file):
-    with open (file,'r') as f:
-        matrix= f.readlines()
-        line=[i.strip().split(',') for i in matrix ]
-        lines= line[2:]
-        lines=[[int((x))for x in i ]for i in lines]
-        firstlst= range(len(lines[0]))
-        # print(f'ths is firstlst {firstlst}')
-    
-            
-        print ([lines[i][i]for i in firstlst])
-
 
     
 match_score = 1 
 mismatch_score=-1
 
 
-def matrix(x,y):
-    return [[0]*y for i in range(x)]
-
 
 
 def global_alignment(x,y,gap):
 
-
-    n_matrix=matrix(len(x)+1,len(y)+1) # add +1 here 
+    n_matrix=matrix(len(x)+1,len(y)+1) 
     main_matrix= matrix(len(x)+1,len(y)+1)
-   
     trace_back=matrix(len(x)+1,len(y)+1)
-    # trace_back[0][0]=(0,0)
+   
 
     for i in range(len(x)): # match mismatch matrix 
         for j in range(len(y)):
@@ -149,13 +122,13 @@ def global_alignment(x,y,gap):
                 n_matrix[i][j]=mismatch_score
 
 
-    for i in range(len(x)+1):
+    for i in range(len(x)+1): # gap score matrix 
         main_matrix[i][0]=gap*i
     for j in range(len(y)+1):
         main_matrix[0][j]=gap*j
     # print(f'main-{main_matrix}')
 
-    for i in range(1,len(x)+1):
+    for i in range(1,len(x)+1): #finalizing the scoring matrix
         for j in range(1,len(y)+1):
             left=main_matrix[i][j-1]+gap
             up=main_matrix[i-1][j]+gap
@@ -170,6 +143,8 @@ def global_alignment(x,y,gap):
     print('Scoring matrix:')
     printMatrix(main_matrix)
 
+    #traceback
+    
     align1 =[]
     align2=[]
     i=len(x)    
@@ -199,21 +174,15 @@ def global_alignment(x,y,gap):
 
 
 
-
-
-
-
-
 def local_alignment(x,y,gap):
 
     l_matrix=matrix(len(x)+1,len(y)+1)
-    # print(l_matrix)
     final_matrix= matrix(len(x)+1,len(y)+1)
-    trace_matrix= matrix(len(x)+1,len(y)+1)
+   
     best=0
     opt=(0,0)
 
-    for i in range(len(x)):
+    for i in range(len(x)): # match mismatch matrix 
         for j in range(len(y)): 
             if x[i]==y[j]:
                 l_matrix[i][j]=match_score
@@ -221,33 +190,32 @@ def local_alignment(x,y,gap):
                 l_matrix[i][j]=mismatch_score
     
 
-    for i in range(len(x)+1):
+    for i in range(len(x)+1): gap_score matrix 
             final_matrix[i][0]=i*gap
     for j in range(len(y)+1):
         final_matrix[0][j]=j*gap
     
 
-    for inside,outside in enumerate(final_matrix):  
+    for inside,outside in enumerate(final_matrix): #coverting negative values to zero
         for inner,outer in enumerate(outside):
             if outer<0:
                 final_matrix[inside][inner]=0
     
 
-    for i in range(1,len(x)+1):
+    for i in range(1,len(x)+1): #forming the scoring matrix 
         for j in range(1,len(y)+1):
             diagonal= final_matrix[i-1][j-1]+l_matrix[i-1][j-1]
             left=final_matrix[i][j-1]+gap
             up=final_matrix[i-1][j]+gap
             final_matrix[i][j]=max(0,diagonal,left,up)
             
-            if final_matrix[i][j]>=best: # find higest score
+            if final_matrix[i][j]>=best: #find higest score
                 best= final_matrix[i][j]
                 optloc=(i,j) # this find the location of it 
     print('Scoring matrix:')
     printMatrix(final_matrix)
 
-    
-
+    #traceback
     sequence=''
 
     i=optloc[0]
@@ -270,7 +238,7 @@ def local_alignment(x,y,gap):
 
 
 
-#driver 
+#driver code
 if __name__ == "__main__":
     protein1=''
     protein2= ''

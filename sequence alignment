@@ -171,6 +171,56 @@ def global_alignment(x,y,gap):
 
     print(*align1[::-1])
     print(*align2[::-1])
+def semi_global(x,y,gap):
+    main_matrix=matrix(len(x)+1,len(y)+1)
+    traceback=matrix(len(x)+1,len(y)+1)
+
+    for i in range(1,len(x)+1):
+        for j in range(1,len(y)+1):
+            # main_matrix[i][j]=np.max(main_matrix[i-1][j-1]+n_matrix[i-1][j-1],max(main_matrix[i-1][j]+gap_score,main_matrix[-1][i-1][j]+terminal_gap),max(main_matrix[i][j-1]+gap_score,main_matrix[:,-1][i][j-1]+terminal_gap))
+            matrix1=main_matrix[i-1][j]+gap,main_matrix[i][j-1]+gap,[-1,1][x[i-1]==y[j-1]]
+            main_matrix[i][j]=max(matrix1)
+            traceback[i][j]=matrix1.index(main_matrix[i][j])
+    print(main_matrix)
+            
+
+    lastcol= max(range(len(x)+1),key=lambda z: main_matrix[z][len(y)])
+    lastrow=max(range(len(y)+1),key=lambda z: main_matrix[len(x)][z])
+
+    if main_matrix[len(x)][lastrow]>=main_matrix[lastcol][len(y)]:
+        i=len(x)
+        j=lastrow
+    else:
+        i=lastcol
+        j=len(y)
+
+    indel = lambda word, i: word[:i] + '-' + word[i:]
+
+    xalign,yalign=x,y
+    
+    for n in range(len(x)-i):
+        yalign+= '-'
+    for n in range(len(y)-j):
+        xalign+='-'
+    
+    while i*j !=0:
+        if traceback[i][j]==0:
+            i-=1
+            yalign=indel(yalign,j)
+        elif traceback[i][j]==1:
+            j-=1
+            xalign=indel(xalign,i)
+        else:
+            i-=1
+            j-=1
+    
+    for n in range (i):
+        yalign=indel(yalign,0)
+    for n in range(j):
+        xalign=indel(xalign,0)
+    
+    print(yalign)
+    print(xalign)
 
 
 
@@ -258,6 +308,8 @@ if __name__ == "__main__":
             global_alignment(protein1,protein2,gap)
         elif alignType.lower()=='l':
             local_alignment(protein1,protein2,gap)
+        elif alignType.lower()=='s':
+            semi_global(protein1,protein2,gap)
         else: 
             raise ValueError('Invalid input')
             exit()
@@ -266,9 +318,10 @@ if __name__ == "__main__":
             global_alignment(seq1,seq2,gap)
         elif alignType.lower()=='l':
             local_alignment(seq1,seq2,gap)
+        elif alignType.lower()=='s':
+            semi_global(seq1,seq2,gap)
         else: 
             raise ValueError('Invalid input')
-    
 
 
        

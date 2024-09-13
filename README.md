@@ -100,16 +100,4 @@ For RNA-to-protein translation, the tool uses a standard codon table where each 
   - `semi_global_alignment`: Performs semi-global alignment (implementation is currently pending).
   - `print_matrix`: Prints the alignment matrix for debugging or visual inspection.
 
-## Future Work
 
-- Implement semi-global alignment.
-- Add support for scoring matrices such as BLOSUM or PAM for protein alignment.
-- Improve performance for large sequences.
-
-## Contributing
-
-If you'd like to contribute to this project, feel free to fork the repository and submit pull requests. Bug reports and feature requests can be submitted via the [issue tracker](https://github.com/your-repo/bioinformatics-alignment-tool/issues).
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
